@@ -5,13 +5,15 @@
 #pragma once
 
 #include <string>
-
+#include <vector>
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SendableChooser.h>
-
+#include <units/length.h>
 #include <rev/CANSparkMax.h>
-
+#include <frc/DigitalInput.h>
 #include <frc/XboxController.h>
+#include <networktables/NetworkTable.h>
+#include <networktables/NetworkTableInstance.h>
 
 class Robot : public frc::TimedRobot {
  public:
@@ -34,11 +36,61 @@ class Robot : public frc::TimedRobot {
   const std::string kAutoNameCustom = "My Auto";
   std::string m_autoSelected;
 
-  rev::CANSparkMax motor {2, rev::CANSparkMaxLowLevel::MotorType::kBrushed};
+  rev::CANSparkMax m_hood_motor {22, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
   frc::XboxController stick {0};
 
-  rev::CANSparkMax m_left_motor {0, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
-  rev::CANSparkMax m_right_motor {1, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+  rev::CANSparkMax m_left_motor {30, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+  rev::CANSparkMax m_right_motor {29, rev::CANSparkMaxLowLevel::MotorType::kBrushless};
+
+  rev::SparkMaxPIDController m_pid = m_left_motor.GetPIDController();
+  rev::SparkMaxPIDController m_HoodPid = m_hood_motor.GetPIDController();
+
+  frc::DigitalInput m_limit_switch{1};
+
+  rev::SparkMaxRelativeEncoder m_hood_encoder = m_hood_motor.GetEncoder();
+  rev::SparkMaxRelativeEncoder m_spin_encoder = m_left_motor.GetEncoder();
+
+  enum STATE
+  {
+    STOP,
+    UP,
+    DOWN
+
+  } m_state;
+
+  double xDistance;
+  double yDistance;
+
+  double xNeededDistance;
+  double yNeededDistance;
+
+  double m_rpm = 2000.0;
+  double m_position = 150.0;
 
 
+    struct pidCoeff {
+    double kP;
+    double kI;
+    double kD;
+    double kIz;
+    double kFF;
+    double kMinOutput;
+    double kMaxOutput;
+  };
+  pidCoeff m_pidCoeff {0.0001, 0.0, 0.002, 0.0, 0.00018, -1.0, 1.0};
+  pidCoeff m_pidCoeffHood {0.2, 0.0, 0.0, 0.0, 0.0, -1.0, 1.0};
+};
+
+class Vision{
+
+  public:
+
+    units::inch_t getDistanceToTarget();
+
+
+  private:
+
+  std::shared_ptr<nt::NetworkTable> m_table = nt::NetworkTableInstance::GetDefault().GetTable("limelight-dev");
+
+  std::vector<double> m_zero_vector = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 };
