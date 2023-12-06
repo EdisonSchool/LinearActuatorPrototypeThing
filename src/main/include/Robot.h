@@ -15,6 +15,20 @@
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
 
+class Vision{
+
+  public:
+
+    units::meter_t getDistanceToTarget();
+
+
+  private:
+
+  std::shared_ptr<nt::NetworkTable> m_table = nt::NetworkTableInstance::GetDefault().GetTable("limelight");
+
+  std::vector<double> m_zero_vector = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+};
+
 class Robot : public frc::TimedRobot {
  public:
   void RobotInit() override;
@@ -50,6 +64,7 @@ class Robot : public frc::TimedRobot {
   rev::SparkMaxRelativeEncoder m_hood_encoder = m_hood_motor.GetEncoder();
   rev::SparkMaxRelativeEncoder m_spin_encoder = m_left_motor.GetEncoder();
 
+  Vision m_vision;
   enum STATE
   {
     STOP,
@@ -58,14 +73,9 @@ class Robot : public frc::TimedRobot {
 
   } m_state;
 
-  double xDistance;
-  double yDistance;
 
-  double xNeededDistance;
-  double yNeededDistance;
-
-  double m_rpm = 2000.0;
-  double m_position = 150.0;
+  double m_rpm = 6000.0;
+  double m_position = 200.0;
 
 
     struct pidCoeff {
@@ -77,20 +87,6 @@ class Robot : public frc::TimedRobot {
     double kMinOutput;
     double kMaxOutput;
   };
-  pidCoeff m_pidCoeff {0.0001, 0.0, 0.002, 0.0, 0.00018, -1.0, 1.0};
+  pidCoeff m_pidCoeff {0.0001, 0.0, 0.002, 0.0, 0.00018, -1.0, 3.0};
   pidCoeff m_pidCoeffHood {0.2, 0.0, 0.0, 0.0, 0.0, -1.0, 1.0};
-};
-
-class Vision{
-
-  public:
-
-    units::inch_t getDistanceToTarget();
-
-
-  private:
-
-  std::shared_ptr<nt::NetworkTable> m_table = nt::NetworkTableInstance::GetDefault().GetTable("limelight-dev");
-
-  std::vector<double> m_zero_vector = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 };

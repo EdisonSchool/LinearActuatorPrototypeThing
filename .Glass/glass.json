@@ -1,5 +1,10 @@
 {
   "NetworkTables": {
+    "retained": {
+      "limelight": {
+        "open": true
+      }
+    },
     "transitory": {
       "SmartDashboard": {
         "Auto Modes": {
@@ -14,6 +19,7 @@
     }
   },
   "NetworkTables Settings": {
+    "dsClient": false,
     "mode": "Client (NT4)",
     "serverTeam": "2240"
   },
@@ -43,7 +49,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <1>": {
       "plots": [
@@ -64,6 +73,24 @@
       "window": {
         "visible": false
       }
+    },
+    "Plot <3>": {
+      "plots": [
+        {
+          "height": 326,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/position"
+            }
+          ]
+        }
+      ]
     }
   }
 }

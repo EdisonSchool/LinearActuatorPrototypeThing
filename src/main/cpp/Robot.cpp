@@ -43,9 +43,7 @@ m_hood_motor.SetSmartCurrentLimit(40);
 m_left_motor.SetSmartCurrentLimit(40);
 m_right_motor.SetSmartCurrentLimit(40);
 
-// Because why not, goes to bottom when initialized
- m_HoodPid.SetReference(m_position, rev::CANSparkMax::ControlType::kPosition);
- m_state = DOWN;
+
 }
 
 /**
@@ -126,22 +124,28 @@ void Robot::TeleopInit()
   m_HoodPid.SetFF(m_pidCoeffHood.kFF);
   m_HoodPid.SetOutputRange(m_pidCoeffHood.kMinOutput, m_pidCoeffHood.kMaxOutput);
 
-
-
-  frc::SmartDashboard::PutNumber("rpm", m_rpm);
-  frc::SmartDashboard::PutNumber("position", m_position);
-
+  //frc::SmartDashboard::PutNumber("rpm", m_rpm);
+  //frc::SmartDashboard::PutNumber("position", m_position);
+  
   m_right_motor.Follow(m_left_motor, true);
 
 // Because why not, goes to bottom when initialized
  //m_HoodPid.SetReference(m_position, rev::CANSparkMax::ControlType::kPosition);
 
+// Because why not, goes to bottom when initialized
+ //m_hood_motor.Set(0.1);
+ m_state = DOWN;
+ //if (m_limit_switch.Get()){
+  //m_hood_encoder.SetPosition(0);
+ //}
 
 }
 
 void Robot::TeleopPeriodic(){
 
-//Lime Light Number 10.22.40.1 
+m_vision.getDistanceToTarget();
+
+//Lime Light Number 10.22.40.85 
 //The port to watch limelight is :5801
 //10.22.40.1:5801
 
@@ -166,18 +170,18 @@ void Robot::TeleopPeriodic(){
 switch (m_state)
 {
 case UP:
-std::cout << "up\n";
+//std::cout << "up\n"; commented out since hood difficulties
     m_HoodPid.SetReference(-1 * m_position, rev::CANSparkMax::ControlType::kPosition);
 break;
 
 case DOWN:
-    std::cout << "down\n";
+    //std::cout << "down\n"; commented out since hood difficulties
     m_HoodPid.SetReference(m_position, rev::CANSparkMax::ControlType::kPosition);
 
 break;
 
 case STOP:
-    std::cout << "stopped\n";
+    //std::cout << "stopped\n"; commented out since hood difficulties
     m_hood_motor.Set(0);
 
 break;
@@ -187,8 +191,28 @@ default:
   break;
 }
 
+if (!m_limit_switch.Get())
+
+{
+  std::cout << "Limit Switch\n";
+  m_state = STOP;
+  m_hood_encoder.SetPosition(0);
+}
+
+
+//Soft Limits
+m_hood_motor.EnableSoftLimit(rev::CANSparkMax::SoftLimitDirection::kForward, true);
+m_hood_motor.SetSoftLimit(rev::CANSparkMax::SoftLimitDirection::kForward, 0);
+
+
+
+//Lowest position we want for 72
+
     frc::SmartDashboard::PutNumber("current rpm", m_spin_encoder.GetVelocity());
-        frc::SmartDashboard::PutNumber("desired rpm", m_rpm);
+    frc::SmartDashboard::PutNumber("current position", m_hood_encoder.GetPosition());
+    frc::SmartDashboard::PutNumber("rpm", m_rpm);
+    frc::SmartDashboard::PutNumber("position", m_position);
+
   //INTAKING//
  if(stick.GetRightTriggerAxis() >= 0.1)
   {
@@ -208,33 +232,36 @@ default:
  else{
    m_left_motor.Set(0);
  }
+
 }
 
 
 //VISION//
-units::inch_t Vision::getDistanceToTarget()
+units::meter_t Vision::getDistanceToTarget()
 {
 
-  if((m_table->GetNumber("tv", 0.0) > 0.5) && (m_table->GetNumber("tid", 0.0) == 8)){
+  if((m_table->GetNumber("tv", 0.0) > 0.5)){
     
     auto target = m_table->GetNumberArray("camerapose_targetspace", m_zero_vector);
+  frc::SmartDashboard::PutNumberArray("value list", target);
+    // frc::SmartDashboard::PutNumber("tx", target[0]);
+    // frc::SmartDashboard::PutNumber("ty", target[1]);
+    // frc::SmartDashboard::PutNumber("tz", target[2]);
+    // frc::SmartDashboard::PutNumber("rx", target[3]);
+    // frc::SmartDashboard::PutNumber("ry", target[4]);
+    // frc::SmartDashboard::PutNumber("rz", target[5]);
 
-    frc::SmartDashboard::PutNumber("tx", target[0]);
-    frc::SmartDashboard::PutNumber("ty", target[1]);
-    frc::SmartDashboard::PutNumber("tz", target[2]);
-    frc::SmartDashboard::PutNumber("rx", target[3]);
-    frc::SmartDashboard::PutNumber("ry", target[4]);
-    frc::SmartDashboard::PutNumber("rz", target[5]);
 
-
-    auto distance = units::inch_t{sqrt(target[0] * target[0] + target[1] * target[1] + target[2] * target[2])};
+    auto distance = units::meter_t{sqrt(target[0] * target[0] + target[1] * target[1] + target[2] * target[2])};
     frc::SmartDashboard::PutNumber("distance", distance.value());
 
     return distance;
+    // return 0.0_in;
   }
   else{
     return 0.0_in;
   }
+
 }
 
 void Robot::DisabledInit() {}
