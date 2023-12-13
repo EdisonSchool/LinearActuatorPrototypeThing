@@ -74,7 +74,7 @@ class Robot : public frc::TimedRobot {
   } m_state;
 
 
-  double m_rpm = 6000.0;
+  double m_rpm = 2450;
   double m_position = 200.0;
 
 

@@ -123,9 +123,6 @@ void Robot::TeleopInit()
   m_HoodPid.SetIZone(m_pidCoeffHood.kIz);
   m_HoodPid.SetFF(m_pidCoeffHood.kFF);
   m_HoodPid.SetOutputRange(m_pidCoeffHood.kMinOutput, m_pidCoeffHood.kMaxOutput);
-
-  //frc::SmartDashboard::PutNumber("rpm", m_rpm);
-  //frc::SmartDashboard::PutNumber("position", m_position);
   
   m_right_motor.Follow(m_left_motor, true);
 
